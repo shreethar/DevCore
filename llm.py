@@ -43,14 +43,17 @@ def ask(prompt: str, history: list) -> None:
     response_text = ""
 
     try:
-        stream = client.responses.create(
+        response = client.chat.completions.create(
             model=MODEL,
-            messages = history,
+            messages=history,
             stream=True,
+            extra_body={"reasoning": {"enabled": False}}
         )
 
-        for event in stream:
-            print(event)
+        for chunk in response:
+            content = chunk.choices[0].delta.content
+            if content:
+                print(content, end="", flush=True)
 
     except openai.APIConnectionError:
         console.print("\n[red]Connection error — are you online?[/red]")
